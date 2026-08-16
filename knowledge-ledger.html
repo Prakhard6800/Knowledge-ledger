@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Ledger — Knowledge Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1A2332;
+    --ink-2:#232F42;
+    --parchment:#F4EFE1;
+    --parchment-dim:#E9E1CC;
+    --gold:#C2992C;
+    --gold-dim:#9E7C22;
+    --sage:#6F8F6F;
+    --sage-dim:#57724F;
+    --rust:#A8503A;
+    --text-on-ink:#F4EFE1;
+    --text-on-ink-dim:#B9C0CC;
+    --line:rgba(244,239,225,0.14);
+    --line-strong:rgba(244,239,225,0.28);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--ink);
+    color:var(--text-on-ink);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+  }
+  .wrap{max-width:1040px;margin:0 auto;padding:40px 28px 80px;}
+
+  /* Header */
+  header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:36px;border-bottom:1px solid var(--line-strong);padding-bottom:24px;flex-wrap:wrap;gap:16px;}
+  .brand{display:flex;align-items:center;gap:14px;}
+  .brand-mark{width:44px;height:44px;border:1.5px solid var(--gold);border-radius:2px;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:600;font-size:20px;color:var(--gold);flex-shrink:0;}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:28px;margin:0;letter-spacing:0.2px;}
+  .tagline{font-size:13px;color:var(--text-on-ink-dim);margin-top:2px;letter-spacing:0.3px;}
+  .streak-badge{text-align:right;}
+  .streak-num{font-family:'Fraunces',serif;font-size:34px;font-weight:600;color:var(--gold);line-height:1;}
+  .streak-label{font-size:11px;color:var(--text-on-ink-dim);text-transform:uppercase;letter-spacing:1px;margin-top:4px;}
+
+  /* Stamp card (signature element) */
+  .stampcard{background:var(--ink-2);border:1px solid var(--line);border-radius:6px;padding:22px 24px;margin-bottom:32px;}
+  .stampcard-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+  .stampcard-title{font-family:'Fraunces',serif;font-size:15px;font-weight:500;color:var(--text-on-ink);}
+  .stampcard-sub{font-size:12px;color:var(--text-on-ink-dim);}
+  .stamp-row{display:flex;gap:10px;flex-wrap:wrap;}
+  .stamp{
+    width:100%;max-width:120px;flex:1 1 100px;
+    aspect-ratio:1;border:1.5px dashed var(--line-strong);border-radius:50%;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    cursor:pointer;user-select:none;transition:border-color .15s, background .15s;
+    background:transparent;
+  }
+  .stamp:hover{border-color:var(--gold-dim);}
+  .stamp.done{border:1.5px solid var(--sage);background:rgba(111,143,111,0.12);}
+  .stamp-day{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-on-ink-dim);}
+  .stamp-mark{font-family:'Fraunces',serif;font-size:20px;color:var(--sage);margin-top:2px;}
+  .stamp.done .stamp-day{color:var(--sage);}
+
+  /* Section headers */
+  .section-head{display:flex;justify-content:space-between;align-items:baseline;margin:0 0 16px;}
+  .section-head h2{font-family:'Fraunces',serif;font-weight:500;font-size:19px;margin:0;}
+  .section-head .count{font-size:12px;color:var(--text-on-ink-dim);}
+
+  /* Layout grid */
+  .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:32px;}
+  @media(max-width:760px){.grid{grid-template-columns:1fr;}}
+  section.block{margin-bottom:40px;}
+
+  /* Forms */
+  .form-row{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
+  input[type=text], select, textarea{
+    background:var(--ink-2);border:1px solid var(--line-strong);color:var(--text-on-ink);
+    padding:10px 12px;border-radius:4px;font-family:'Inter',sans-serif;font-size:13px;
+  }
+  input[type=text]:focus, select:focus, textarea:focus{outline:none;border-color:var(--gold);}
+  input[type=text]{flex:1;min-width:140px;}
+  select{cursor:pointer;}
+  textarea{width:100%;resize:vertical;min-height:56px;font-family:'Inter',sans-serif;}
+  button{
+    background:transparent;border:1px solid var(--gold);color:var(--gold);
+    padding:10px 16px;border-radius:4px;font-size:13px;font-weight:500;cursor:pointer;
+    font-family:'Inter',sans-serif;transition:background .15s, color .15s;white-space:nowrap;
+  }
+  button:hover{background:var(--gold);color:var(--ink);}
+  button.ghost{border-color:var(--line-strong);color:var(--text-on-ink-dim);}
+  button.ghost:hover{background:var(--ink-2);color:var(--text-on-ink);}
+  button.small{padding:5px 10px;font-size:11px;}
+
+  /* Reading list */
+  .book-cat{margin-bottom:22px;}
+  .book-cat-label{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--gold-dim);margin-bottom:8px;border-bottom:1px solid var(--line);padding-bottom:6px;}
+  .book{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);gap:10px;}
+  .book:last-child{border-bottom:none;}
+  .book-title{font-size:13.5px;flex:1;}
+  .book-title.done{color:var(--text-on-ink-dim);text-decoration:line-through;text-decoration-color:var(--line-strong);}
+  .badge{font-size:10px;padding:3px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:0.5px;flex-shrink:0;}
+  .badge.want{background:rgba(184,184,184,0.12);color:var(--text-on-ink-dim);}
+  .badge.reading{background:rgba(194,153,44,0.15);color:var(--gold);}
+  .badge.done{background:rgba(111,143,111,0.15);color:var(--sage);}
+  .book-actions{display:flex;gap:6px;}
+  .icon-btn{background:none;border:none;color:var(--text-on-ink-dim);cursor:pointer;font-size:14px;padding:2px 5px;}
+  .icon-btn:hover{color:var(--rust);}
+
+  /* Notes log */
+  .note{background:var(--ink-2);border-left:2px solid var(--gold-dim);border-radius:0 4px 4px 0;padding:12px 14px;margin-bottom:10px;}
+  .note-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+  .note-tag{font-size:10px;text-transform:uppercase;letter-spacing:0.8px;color:var(--gold);}
+  .note-date{font-size:11px;color:var(--text-on-ink-dim);}
+  .note-text{font-size:13.5px;line-height:1.55;color:var(--text-on-ink);}
+  .note-del{background:none;border:none;color:var(--text-on-ink-dim);font-size:11px;cursor:pointer;float:right;margin-top:6px;}
+  .note-del:hover{color:var(--rust);}
+
+  .empty{font-size:12.5px;color:var(--text-on-ink-dim);font-style:italic;padding:8px 0;}
+  .loading{text-align:center;padding:60px 0;color:var(--text-on-ink-dim);font-size:13px;}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <div class="loading" id="loading">Opening the ledger…</div>
+</div>
+
+<script>
+const CATS = ["Business & Economics","Psychology & Philosophy","Science & Technology","History & Politics"];
+let state = { streak: {}, books: [], notes: [] };
+
+function todayKey(d){ return d.toISOString().slice(0,10); }
+function fmtDate(k){ const d=new Date(k+"T00:00:00"); return d.toLocaleDateString(undefined,{month:'short',day:'numeric'}); }
+
+async function loadState(){
+  try{
+    const raw = localStorage.getItem('ledger-state');
+    if(raw) state = JSON.parse(raw);
+  }catch(e){ /* no existing data yet */ }
+  render();
+}
+async function saveState(){
+  try{ localStorage.setItem('ledger-state', JSON.stringify(state)); }
+  catch(e){ console.error('save failed', e); }
+}
+
+function last7Days(){
+  const days=[];
+  const now=new Date();
+  for(let i=6;i>=0;i--){
+    const d=new Date(now); d.setDate(now.getDate()-i);
+    days.push(todayKey(d));
+  }
+  return days;
+}
+function computeStreak(){
+  let count=0;
+  let d=new Date();
+  while(true){
+    const k=todayKey(d);
+    if(state.streak[k]){ count++; d.setDate(d.getDate()-1); }
+    else break;
+  }
+  return count;
+}
+
+function toggleStamp(key){
+  state.streak[key] = !state.streak[key];
+  saveState(); render();
+}
+
+function addBook(){
+  const titleEl=document.getElementById('book-title');
+  const catEl=document.getElementById('book-cat');
+  const title=titleEl.value.trim();
+  if(!title) return;
+  state.books.unshift({id:Date.now().toString(36), title, cat:catEl.value, status:'want'});
+  titleEl.value='';
+  saveState(); render();
+}
+function cycleStatus(id){
+  const b=state.books.find(x=>x.id===id);
+  if(!b) return;
+  b.status = b.status==='want' ? 'reading' : b.status==='reading' ? 'done' : 'want';
+  saveState(); render();
+}
+function removeBook(id){
+  state.books = state.books.filter(x=>x.id!==id);
+  saveState(); render();
+}
+
+function addNote(){
+  const textEl=document.getElementById('note-text');
+  const tagEl=document.getElementById('note-tag');
+  const text=textEl.value.trim();
+  if(!text) return;
+  const today=todayKey(new Date());
+  state.notes.unshift({id:Date.now().toString(36), text, cat:tagEl.value, date:today});
+  state.streak[today]=true;
+  textEl.value='';
+  saveState(); render();
+}
+function removeNote(id){
+  state.notes = state.notes.filter(x=>x.id!==id);
+  saveState(); render();
+}
+
+function catOptions(selected){
+  return CATS.map(c=>`<option value="${c}" ${c===selected?'selected':''}>${c}</option>`).join('');
+}
+
+function render(){
+  const streakCount = computeStreak();
+  const days = last7Days();
+  const dayLabels = days.map(k=>{
+    const d=new Date(k+"T00:00:00");
+    return d.toLocaleDateString(undefined,{weekday:'short'}).slice(0,3);
+  });
+
+  const booksByCat = CATS.map(cat=>{
+    const items = state.books.filter(b=>b.cat===cat);
+    if(items.length===0) return '';
+    const rows = items.map(b=>`
+      <div class="book">
+        <span class="book-title ${b.status==='done'?'done':''}">${escapeHtml(b.title)}</span>
+        <span class="badge ${b.status}" onclick="cycleStatus('${b.id}')" style="cursor:pointer">${b.status==='want'?'To read':b.status==='reading'?'Reading':'Finished'}</span>
+        <div class="book-actions">
+          <button class="icon-btn" aria-label="Remove ${escapeHtml(b.title)}" onclick="removeBook('${b.id}')">✕</button>
+        </div>
+      </div>`).join('');
+    return `<div class="book-cat"><div class="book-cat-label">${cat}</div>${rows}</div>`;
+  }).join('');
+
+  const notesHtml = state.notes.length ? state.notes.slice(0,50).map(n=>`
+    <div class="note">
+      <div class="note-meta">
+        <span class="note-tag">${n.cat}</span>
+        <span class="note-date">${fmtDate(n.date)}</span>
+      </div>
+      <div class="note-text">${escapeHtml(n.text)}</div>
+      <button class="note-del" onclick="removeNote('${n.id}')">Remove</button>
+    </div>`).join('') : '<div class="empty">Nothing logged yet. What did you learn today?</div>';
+
+  const app = document.getElementById('app');
+  app.innerHTML = `
+    <header>
+      <div class="brand">
+        <div class="brand-mark">L</div>
+        <div>
+          <h1>The Ledger</h1>
+          <div class="tagline">Your knowledge, tracked and stamped daily</div>
+        </div>
+      </div>
+      <div class="streak-badge">
+        <div class="streak-num">${streakCount}</div>
+        <div class="streak-label">Day streak</div>
+      </div>
+    </header>
+
+    <div class="stampcard">
+      <div class="stampcard-top">
+        <div class="stampcard-title">This week's card</div>
+        <div class="stampcard-sub">Tap a day to stamp it</div>
+      </div>
+      <div class="stamp-row">
+        ${days.map((k,i)=>`
+          <div class="stamp ${state.streak[k]?'done':''}" onclick="toggleStamp('${k}')">
+            <span class="stamp-day">${dayLabels[i]}</span>
+            <span class="stamp-mark">${state.streak[k]?'✓':''}</span>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    <div class="grid">
+      <section class="block">
+        <div class="section-head">
+          <h2>Reading list</h2>
+          <span class="count">${state.books.length} total</span>
+        </div>
+        <div class="form-row">
+          <input type="text" id="book-title" placeholder="Book or topic title" onkeydown="if(event.key==='Enter')addBook()">
+          <select id="book-cat">${catOptions()}</select>
+          <button onclick="addBook()">Add</button>
+        </div>
+        ${booksByCat || '<div class="empty">Your reading list is empty. Add a book above to start.</div>'}
+      </section>
+
+      <section class="block">
+        <div class="section-head">
+          <h2>Daily notes</h2>
+          <span class="count">${state.notes.length} entries</span>
+        </div>
+        <div class="form-row" style="flex-direction:column;align-items:stretch;">
+          <textarea id="note-text" placeholder="What did you learn today?"></textarea>
+          <div class="form-row" style="margin-bottom:0;margin-top:8px;">
+            <select id="note-tag">${catOptions()}</select>
+            <button onclick="addNote()">Log it</button>
+          </div>
+        </div>
+        ${notesHtml}
+      </section>
+    </div>
+  `;
+}
+
+function escapeHtml(s){
+  const d=document.createElement('div');
+  d.textContent=s;
+  return d.innerHTML;
+}
+
+loadState();
+</script>
+</body>
+</html>
